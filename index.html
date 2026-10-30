@@ -3222,10 +3222,14 @@
         renderPokedex();
     }
 
-    function getAgentCount(name) {
-        const prog = currentAccount ? allAccounts[currentAccount] : {};
+    function getAgentCount(name, prog = currentAccount ? allAccounts[currentAccount] : {}) {
         let c = 0;
-        agentTree[name].bonds.forEach(b=>b.validWeathers.forEach(w=>{ if(prog[getSKey([name,...b.target.split(' × ')],b.action,w)]) c++; }));
+        agentTree[name].bonds.forEach(b => {
+            if (b.notOnCurrent) return;
+            b.validWeathers.forEach(w => {
+                if (prog[getSKey([name, ...b.target.split(' × ')], b.action, w)]) c++;
+            });
+        });
         return c;
     }
 
@@ -3299,9 +3303,6 @@
                 const state = doneCount < cells.length;
                 cells.forEach(c=>allAccounts[currentAccount][c.key]=state);
                 localStorage.setItem('yuan_all_accounts', JSON.stringify(allAccounts));
-                grid.querySelectorAll('.weather-item').forEach(item=>{
-                    item.className = `weather-item${allAccounts[currentAccount][item.dataset.key]?' unlocked':''}`;
-                });
                 updateUI();
             };
 
@@ -3317,10 +3318,6 @@
                         if(!checkAcc()) return;
                         allAccounts[currentAccount][key] = !allAccounts[currentAccount][key];
                         localStorage.setItem('yuan_all_accounts', JSON.stringify(allAccounts));
-                        const ns = allAccounts[currentAccount][key];
-                        document.querySelectorAll(`.weather-item[data-key="${key}"]`).forEach(el => {
-                            el.className = `weather-item${ns?' unlocked':''}`;
-                        });
                         updateUI();
                     };
                 }
@@ -3425,14 +3422,13 @@
 
     function updateUI() {
         const prog = currentAccount ? allAccounts[currentAccount] : {};
+        // A saved bond is shared by every member's card and the dispatch view.
+        document.querySelectorAll('.weather-item[data-key]').forEach(item => {
+            item.classList.toggle('unlocked', !!prog[item.dataset.key]);
+        });
         Object.keys(agentTree).forEach(name => {
-            let count=0; const agent=agentTree[name];
-            agent.bonds.forEach(b => {
-                if (b.notOnCurrent) return;  // 当前服未开放的不计入
-                b.validWeathers.forEach(w => {
-                    if (prog[getSKey([name,...b.target.split(' × ')],b.action,w)]) count++;
-                });
-            });
+            const agent = agentTree[name];
+            const count = getAgentCount(name, prog);
             const el=document.getElementById(`comp-${name}`);
             const det=document.getElementById(`agent-${name}`);
             const mini=document.getElementById(`minibar-${name}`);
@@ -4054,7 +4050,7 @@
     }
 
     recalcServerStats();
-    buildData(); updateAccountUI(); renderPokedex();
+    updateAccountUI(); buildData(); renderPokedex();
 
     // ── 开发者工具：跨服差异维护 ──────────────────────────────
     // 仅当 URL 包含 #dev / ?dev=1 时显示子分页
