@@ -1,0 +1,28 @@
+{
+  "name": "yuan-bonds",
+  "version": "1.0.0",
+  "description": "鸢报羁绊助手 — static bond tracker",
+  "scripts": {
+    "dev": "node scripts/serve.js",
+    "test": "node --test tests/*.test.js",
+    "test:browser": "playwright test",
+    "format": "prettier --write index.html css js tests scripts playwright.config.js package.json README.md",
+    "format:check": "prettier --check index.html css js tests scripts playwright.config.js package.json README.md"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/yoyo-yuan/yuan-bonds.git"
+  },
+  "type": "module",
+  "devDependencies": {
+    "@playwright/test": "^1.64.1",
+    "acorn": "^8.19.0",
+    "eslint-scope": "^9.1.2",
+    "jsdom": "^29.1.1",
+    "prettier": "^3.9.10"
+  },
+  "private": true,
+  "engines": {
+    "node": ">=24"
+  }
+}
