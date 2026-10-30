@@ -7,7 +7,7 @@ import {
 } from "../core/accounts.js";
 import { buildData, recalcServerStats } from "../core/bonds.js";
 import { state } from "../core/state.js";
-import { T } from "../data/constants.js";
+import { getLabel } from "../data/constants.js";
 import {
   showDeleteConfirmModal,
   showRenameModal,
@@ -49,7 +49,7 @@ export function confirmAddAccount() {
   var serverCode = state.selectedVer === 2 ? "dyy" : "ry";
   var key = makeAccountKey(serverCode, name);
   if (state.allAccounts[key]) {
-    showToast(T("alert_dup"), true);
+    showToast(getLabel("alert_dup"), true);
     return;
   }
   state.allAccounts[key] = { __server__: serverCode };
@@ -74,7 +74,7 @@ export function updateAccountUI() {
   const sel = document.getElementById("account-select");
   const ob = document.getElementById("onboarding-card");
   if (Object.keys(state.allAccounts).length === 0) {
-    sel.innerHTML = `<option value="">(${T("no_account")})</option>`;
+    sel.innerHTML = `<option value="">(${getLabel("no_account")})</option>`;
     state.currentAccount = null;
     if (ob) ob.style.display = "block";
   } else {
@@ -161,7 +161,7 @@ export function openServerInfoModal() {
 
 export function checkAcc() {
   if (!state.currentAccount) {
-    showToast(T("alert_no_acc"), true);
+    showToast(getLabel("alert_no_acc"), true);
     return false;
   }
   return true;
@@ -181,7 +181,7 @@ export function renameAccount() {
     const trimmed = newName.trim();
     const newKey = makeAccountKey(oldServer, trimmed);
     if (newKey !== oldKey && state.allAccounts[newKey]) {
-      showToast(T("alert_dup"), true);
+      showToast(getLabel("alert_dup"), true);
       return;
     }
     state.allAccounts[newKey] = state.allAccounts[oldKey];

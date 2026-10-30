@@ -5,17 +5,10 @@ import { getAgentCount } from "../core/progress.js";
 import { state } from "../core/state.js";
 import { agentsData } from "../data/agents.js";
 import { isNewPair } from "../data/bonds.js";
-import {
-  T,
-  Ta,
-  Tat,
-  Td,
-  allW,
-  deptOrder,
-  weathers,
-} from "../data/constants.js";
+import { getLabel, allW, weathers } from "../data/constants.js";
 import { checkAcc } from "./accounts.js";
 import { updateUI } from "./progress.js";
+import { createAgentComparator, reorderAgentCards } from "./agent-order.js";
 export function setSearchFilter(v) {
   state.curFilter.search = v.trim();
   renderPokedex();
@@ -127,6 +120,10 @@ export function buildAgentCard(name, prog) {
   const agent = state.agentTree[name];
   const det = document.createElement("details");
   det.id = `agent-${name}`;
+  det.dataset.agent = name;
+  det.addEventListener("toggle", () => {
+    if (!det.open && det.isConnected) reorderAgentCards();
+  });
   const rar = agentsData[name]?.rar || "";
   if (rar) det.classList.add(`rar-${rar}`);
   // 当前服里这个密探完全没出现 → 整张卡片灰透
@@ -140,7 +137,7 @@ export function buildAgentCard(name, prog) {
   );
   const sumEl = document.createElement("summary");
   sumEl.innerHTML = `
-            <div class="agent-title-left"><span class="agent-title-name">${name}</span><span class="agent-tag">${Td(agent.dept)}</span><span class="agent-tag">${Tat(agent.attr)}</span>${hasNew ? '<span class="new-badge">NEW</span>' : ""}</div>
+            <div class="agent-title-left"><span class="agent-title-name">${name}</span><span class="agent-tag">${agent.dept}</span><span class="agent-tag">${agent.attr}</span>${hasNew ? '<span class="new-badge">NEW</span>' : ""}</div>
             <div class="agent-title-right">
                 <div class="mini-bar-wrap"><div class="mini-bar-fill" id="minibar-${name}" style="width:0%"></div></div>
                 <span class="comp-tag" id="comp-${name}">0/${agent.totalTasks}</span>
@@ -166,8 +163,8 @@ export function buildAgentCard(name, prog) {
     titleDiv.className = "bond-title";
     const typeLabel =
       bType === "-"
-        ? `<span class="btype btype-neg">${T("bond_neg")}</span>`
-        : `<span class="btype btype-pos">${T("bond_pos")}</span>`;
+        ? `<span class="btype btype-neg">${getLabel("bond_neg")}</span>`
+        : `<span class="btype btype-pos">${getLabel("bond_pos")}</span>`;
     const allMembers = [name, ...target.split(" × ")];
     const newBadge = isNewPair(allMembers)
       ? `<span class="new-badge">NEW</span>`
@@ -180,7 +177,7 @@ export function buildAgentCard(name, prog) {
     titleDiv.innerHTML = `与 <span class="target-name">${target}</span> ${typeLabel}${newBadge}${notYetTag}`;
     const btnAll = document.createElement("button");
     btnAll.className = "btn-check-all";
-    btnAll.textContent = T("select_all_cancel");
+    btnAll.textContent = getLabel("select_all_cancel");
     header.appendChild(titleDiv);
     if (!isNotOnCurrent) header.appendChild(btnAll); // 未开放的不显示全选按钮
     body.appendChild(header);
@@ -220,7 +217,7 @@ export function buildAgentCard(name, prog) {
       const img = document.createElement("img");
       img.src = weathers[w];
       const span = document.createElement("span");
-      span.textContent = Ta(action);
+      span.textContent = action;
       item.appendChild(img);
       item.appendChild(span);
       if (!isNotOnCurrent) {
@@ -250,7 +247,7 @@ export function renderPokedex() {
     const ob = document.createElement("div");
     ob.id = "onboarding-card";
     ob.className = "onboarding-card";
-    ob.innerHTML = `<h2>👋 ${T("welcome")}</h2><p>${T("welcome_desc")}</p><button class="btn-onboard" data-click="open-add-modal">${T("create_first")}</button><p class="onboarding-hint">💡 建议使用 Chrome 或夸克浏览器，避免 Safari 存档消失问题</p>`;
+    ob.innerHTML = `<h2>👋 ${getLabel("welcome")}</h2><p>${getLabel("welcome_desc")}</p><button class="btn-onboard" data-click="open-add-modal">${getLabel("create_first")}</button><p class="onboarding-hint">💡 建议使用 Chrome 或夸克浏览器，避免 Safari 存档消失问题</p>`;
     cnt.appendChild(ob);
     return;
   }
@@ -307,28 +304,9 @@ export function renderPokedex() {
   const allMissing = getMissingAgents();
   let anyRendered = false;
   rarGroups.forEach((rar, i) => {
-    // 符合筛选且拥有的
-    const curServer = getCurrentServer();
-    // 判断密探在当前服是否未开放（在如鸢里没出现 = ry 服 not on）
-    const isAgentNotOnCurrent = (n) => {
-      if (curServer === "ry") return !state.serverStats.ryAgents.has(n);
-      if (curServer === "dyy") return !state.serverStats.dyyAgents.has(n);
-      return false;
-    };
     const agents = Object.keys(state.agentTree)
       .filter((n) => matchAgent(n) && (agentsData[n]?.rar || "") === rar)
-      .sort((a, b) => {
-        // 1. 未开放的排到下面
-        const naA = isAgentNotOnCurrent(a),
-          naB = isAgentNotOnCurrent(b);
-        if (naA !== naB) return naA ? 1 : -1;
-        // 2. 部门
-        const da = state.agentTree[a].dept,
-          db = state.agentTree[b].dept;
-        return da !== db
-          ? deptOrder.indexOf(da) - deptOrder.indexOf(db)
-          : a.localeCompare(b, "zh");
-      });
+      .sort(createAgentComparator(state.agentTree, prog));
     // 符合其他筛选条件但被标记未拥有的（同稀有度）
     const missingInFilter = Object.keys(state.agentTree).filter((n) => {
       if ((agentsData[n]?.rar || "") !== rar) return false;

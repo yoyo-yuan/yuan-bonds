@@ -32,6 +32,7 @@ test("all JavaScript modules parse and reference only declared imports or browse
     "Object",
     "Array",
     "Set",
+    "Map",
     "JSON",
     "String",
     "Number",

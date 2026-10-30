@@ -7,7 +7,7 @@ import {
 } from "../core/accounts.js";
 import { buildData } from "../core/bonds.js";
 import { state } from "../core/state.js";
-import { T } from "../data/constants.js";
+import { getLabel } from "../data/constants.js";
 import { updateAccountUI } from "./accounts.js";
 import { showToast } from "./dialogs.js";
 import { renderPokedex } from "./pokedex.js";
@@ -152,7 +152,7 @@ export function importData(event) {
       // 显示导入预览，让用户选合并/覆盖
       showImportPreview(imported);
     } catch {
-      showToast(T("import_fail"), true);
+      showToast(getLabel("import_fail"), true);
     }
   };
   reader.readAsText(file);
@@ -279,5 +279,5 @@ export function confirmImport() {
   buildData(); // 导入后重新按当前账号的服过滤
   updateAccountUI();
   renderPokedex();
-  showToast(T("import_ok"));
+  showToast(getLabel("import_ok"));
 }

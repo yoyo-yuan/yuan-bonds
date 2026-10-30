@@ -1,4 +1,5 @@
 import { test, expect } from "@playwright/test";
+import { createBondModel, getSKey } from "../../js/core/bonds.js";
 
 const key = "张闿_甘宁_纵火_晴天";
 const preferences = {
@@ -158,4 +159,48 @@ test("page loads styles and images and keeps the primary controls inside the vie
     path: testInfo.outputPath("page.png"),
     fullPage: false,
   });
+});
+
+test("a newly completed agent stays in place while open and moves down after collapse", async ({
+  page,
+}) => {
+  const { agentTree } = createBondModel("ry");
+  const progress = {};
+  const name = "安期";
+  for (const bond of agentTree[name].bonds) {
+    if (bond.notOnCurrent) continue;
+    for (const weather of bond.validWeathers) {
+      progress[
+        getSKey([name, ...bond.target.split(" × ")], bond.action, weather)
+      ] = true;
+    }
+  }
+  const remainingKey = Object.keys(progress)[0];
+  progress[remainingKey] = false;
+  await seed(page, { "ry::测试": progress });
+  const card = page.locator(`#agent-${name}`);
+  const position = () =>
+    card.evaluate((element) =>
+      Array.from(element.parentElement.children).indexOf(element),
+    );
+  const before = await position();
+  await card.locator(":scope > summary").click();
+  await card.locator(`[data-key="${remainingKey}"]`).click();
+  await expect(card).toHaveClass(/agent-completed/);
+  await expect(page.locator(`#comp-${name}`)).toHaveText(
+    `${agentTree[name].totalTasks}/${agentTree[name].totalTasks}`,
+  );
+  expect(await position()).toBe(before);
+  await card.locator(":scope > summary").click();
+  await expect.poll(position).toBeGreaterThan(before);
+  await expect(card).not.toHaveAttribute("open", "");
+
+  // Reversing a completed task follows the same rule in the opposite direction.
+  const completedPosition = await position();
+  await card.locator(":scope > summary").click();
+  await card.locator(`[data-key="${remainingKey}"]`).click();
+  await expect(card).not.toHaveClass(/agent-completed/);
+  expect(await position()).toBe(completedPosition);
+  await card.locator(":scope > summary").click();
+  await expect.poll(position).toBe(before);
 });

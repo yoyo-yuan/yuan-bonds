@@ -3,7 +3,7 @@ import { getMissingAgents } from "../core/accounts.js";
 import { getSKey } from "../core/bonds.js";
 import { state } from "../core/state.js";
 import { isNewPair } from "../data/bonds.js";
-import { T, weathers } from "../data/constants.js";
+import { getLabel, weathers } from "../data/constants.js";
 import { updateUI } from "./progress.js";
 export function setViewMode(mode, el) {
   state.curViewMode = mode;
@@ -45,7 +45,7 @@ export function selectWeather(w, el) {
 export function findMatches() {
   if (!state.currentAccount) {
     document.getElementById("match-results").innerHTML =
-      `<div style="text-align:center;padding:30px;color:#aaa;">${T("no_acc_hint")}</div>`;
+      `<div style="text-align:center;padding:30px;color:#aaa;">${getLabel("no_acc_hint")}</div>`;
     return;
   }
   const act = state.curAction,
@@ -67,8 +67,8 @@ export function findMatches() {
         isU = prog[k];
       const typeTag =
         b.bondType === "-"
-          ? `<span class="btype btype-neg">${T("bond_neg")}</span>`
-          : `<span class="btype btype-pos">${T("bond_pos")}</span>`;
+          ? `<span class="btype btype-neg">${getLabel("bond_neg")}</span>`
+          : `<span class="btype btype-pos">${getLabel("bond_pos")}</span>`;
       const newTag = isNewPair(b.members)
         ? `<span class="new-badge">NEW</span>`
         : "";
@@ -82,7 +82,7 @@ export function findMatches() {
         mCount++;
         hMissing += `<div class="result-item" style="opacity:0.6;pointer-events:none;"><div class="result-info"><img src="${weathers[w]}"><span class="member-name">${b.members.join(" × ")}</span>${typeTag}</div><span style="font-size:0.78rem;color:#bbb;">未拥有</span></div>`;
       } else {
-        const html = `<div class="result-item"><div class="result-info"><img src="${weathers[w]}"><span class="member-name">${b.members.join(" × ")}</span>${typeTag}${newTag}</div><button class="toggle-btn ${isU ? "btn-revert" : "btn-unlock"}" data-click="tgl-m" data-arg0="${k}">${isU ? T("cancel_unlock") : T("unlock")}</button></div>`;
+        const html = `<div class="result-item"><div class="result-info"><img src="${weathers[w]}"><span class="member-name">${b.members.join(" × ")}</span>${typeTag}${newTag}</div><button class="toggle-btn ${isU ? "btn-revert" : "btn-unlock"}" data-click="tgl-m" data-arg0="${k}">${isU ? getLabel("cancel_unlock") : getLabel("unlock")}</button></div>`;
         if (isU) {
           hDone += html;
           dCount++;
@@ -93,10 +93,10 @@ export function findMatches() {
     });
   document.getElementById("match-results").innerHTML =
     (hUnlock
-      ? `<div class="result-group-title">${T("can_unlock")}</div><div class="results-grid">${hUnlock}</div>`
-      : `<div style="text-align:center;padding:20px;color:var(--success);font-weight:bold;">${T("all_unlocked")}</div>`) +
+      ? `<div class="result-group-title">${getLabel("can_unlock")}</div><div class="results-grid">${hUnlock}</div>`
+      : `<div style="text-align:center;padding:20px;color:var(--success);font-weight:bold;">${getLabel("all_unlocked")}</div>`) +
     (hDone
-      ? `<div class="result-group-title" style="margin-top:16px;color:#aaa;">📁 ${T("done_group")} (${dCount})</div><div class="results-grid done-items">${hDone}</div>`
+      ? `<div class="result-group-title" style="margin-top:16px;color:#aaa;">📁 ${getLabel("done_group")} (${dCount})</div><div class="results-grid done-items">${hDone}</div>`
       : "") +
     (hMissing
       ? `<div class="result-group-title" style="margin-top:16px;color:#ccc;">🔒 未拥有密探 (${mCount})</div><div class="results-grid">${hMissing}</div>`

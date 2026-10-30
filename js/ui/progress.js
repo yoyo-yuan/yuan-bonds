@@ -6,8 +6,9 @@ import {
 } from "../core/progress.js";
 import { state } from "../core/state.js";
 import { agentsData } from "../data/agents.js";
-import { T } from "../data/constants.js";
+import { getLabel } from "../data/constants.js";
 import { checkBackupNudge } from "./onboarding.js";
+import { reorderAgentCards } from "./agent-order.js";
 export function toggleMilestones() {
   const row = document.getElementById("milestone-row");
   const arrow = document.getElementById("ms-arrow");
@@ -47,6 +48,7 @@ export function updateUI() {
         .join(" ");
     }
   });
+  reorderAgentCards();
   const scope = getProgressScope();
   const { done, total } = calculateProgress(
     state.bondsList,
@@ -104,16 +106,16 @@ export function updateUI() {
     const pct = total ? done / total : 0;
     msgEl.textContent =
       done === 0
-        ? T("msg_0")
+        ? getLabel("msg_0")
         : pct < 0.25
-          ? T("msg_25")
+          ? getLabel("msg_25")
           : pct < 0.5
-            ? T("msg_50").replace("{pct}", Math.round(pct * 100))
+            ? getLabel("msg_50").replace("{pct}", Math.round(pct * 100))
             : pct < 0.75
-              ? T("msg_75").replace("{left}", total - done)
+              ? getLabel("msg_75").replace("{left}", total - done)
               : pct < 1
-                ? T("msg_99").replace("{left}", total - done)
-                : T("msg_100");
+                ? getLabel("msg_99").replace("{left}", total - done)
+                : getLabel("msg_100");
   }
 }
 

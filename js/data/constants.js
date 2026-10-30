@@ -27,20 +27,8 @@ export const STRINGS = {
   create_first: "＋ 建立第一个账号",
 };
 
-export function T(k) {
-  return STRINGS[k] || k;
-}
-
-export function Td(d) {
-  return d;
-}
-
-export function Tat(a) {
-  return a;
-}
-
-export function Ta(a) {
-  return a;
+export function getLabel(key) {
+  return STRINGS[key] || key;
 }
 
 export const weathers = {
