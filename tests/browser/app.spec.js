@@ -101,6 +101,25 @@ for (const buttonClass of ["intro-modal-cta", "intro-modal-close"]) {
   });
 }
 
+test("reference includes new agents and updates their availability when switching servers", async ({
+  page,
+}) => {
+  await seed(page, { "dyy::测试": {}, "ry::另一个": {} });
+  await page.locator(".btn-icon-more").click();
+  await page.locator('[data-arg0="refdata"]').click();
+  await page.locator("#ref-search").fill("陈应");
+  await expect(page.locator(".ref-agent-btn")).toHaveText(["陈应"]);
+  await expect(page.locator("#ref-content")).toContainText("陈登 × 陈应");
+  await page.locator("#account-select").selectOption("ry::另一个");
+  await expect(page.locator(".ref-agent-btn")).toHaveCount(0);
+  await page.locator("#account-select").selectOption("dyy::测试");
+  await expect(page.locator(".ref-agent-btn")).toHaveText(["陈应"]);
+  await page.locator("#ref-search").fill("陈纪");
+  await expect(page.locator(".ref-agent-btn")).toHaveText(["陈纪"]);
+  await expect(page.locator("#ref-content")).toContainText("陈群 × 陈纪");
+  await expect(page.locator("#ref-content table").first()).toBeVisible();
+});
+
 test("agent arrows follow their own expanded state inside an open department", async ({
   page,
 }) => {
