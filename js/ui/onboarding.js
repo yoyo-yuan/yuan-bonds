@@ -1,3 +1,4 @@
+import { countSavedUnlocks } from "../core/progress.js";
 import { state } from "../core/state.js";
 import { ANNOUNCE_VERSION } from "../data/constants.js";
 export function dismissBackupNudge() {
@@ -10,7 +11,7 @@ export function checkBackupNudge() {
   const prog = state.currentAccount
     ? state.allAccounts[state.currentAccount]
     : {};
-  const done = Object.values(prog).filter(Boolean).length;
+  const done = countSavedUnlocks(prog);
   if (done >= 50)
     document.getElementById("backup-nudge").style.display = "block";
 }

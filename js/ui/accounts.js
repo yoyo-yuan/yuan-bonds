@@ -1,3 +1,4 @@
+import { renderBattleBonds } from "./battle-bonds.js";
 import { saveAccounts, saveCurrentAccount } from "../core/storage.js";
 import {
   getAccountName,
@@ -70,6 +71,13 @@ export function confirmAddAccount() {
   } catch (e) {}
 }
 
+function syncAccountSelectLabel() {
+  const select = document.getElementById("account-select");
+  const label = select.selectedOptions[0]?.textContent || "";
+  document.getElementById("account-select-label").textContent = label;
+  select.title = label;
+}
+
 export function updateAccountUI() {
   const sel = document.getElementById("account-select");
   const ob = document.getElementById("onboarding-card");
@@ -90,7 +98,10 @@ export function updateAccountUI() {
       .join("");
     if (ob) ob.style.display = "none";
   }
+  syncAccountSelectLabel();
   updateServerBadge();
+  if (document.getElementById("battle-view").style.display === "block")
+    renderBattleBonds();
 }
 
 export function updateServerBadge() {
@@ -213,6 +224,7 @@ export function deleteAccount() {
 
 export function switchAccount() {
   state.currentAccount = document.getElementById("account-select").value;
+  syncAccountSelectLabel();
   saveCurrentAccount();
   recalcServerStats(); // 按新服别重算密探/羁绊集合
   buildData(); // 重新按当前服筛选
@@ -227,4 +239,6 @@ export function switchAccount() {
   // 如果当前在资料留存子页，重渲染（按新服别）
   const refSubView = document.getElementById("sub-refdata");
   if (refSubView && refSubView.classList.contains("active")) refRender();
+  if (document.getElementById("battle-view").style.display === "block")
+    renderBattleBonds();
 }

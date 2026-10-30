@@ -1,3 +1,4 @@
+import { renderBattleBonds } from "./battle-bonds.js";
 import {
   getCurrentServer,
   getMissingAgents,
@@ -7,6 +8,12 @@ import { state } from "../core/state.js";
 import { agentsData } from "../data/agents.js";
 import { showToast } from "./dialogs.js";
 import { renderPokedex } from "./pokedex.js";
+function refreshCollectionViews() {
+  renderPokedex();
+  if (document.getElementById("battle-view").style.display === "block")
+    renderBattleBonds();
+}
+
 export function updateMissingLabel() {
   const cnt = getMissingAgents().size;
   const el = document.getElementById("missing-count-label");
@@ -29,14 +36,14 @@ export function closeOwnedModal() {
   // 关闭弹窗时 missing 列表可能变了，进度的分母会变化，徽章可能因此突然达成
   // 但这不是用户"新解锁"羁绊导致的，禁掉庆祝
   state._suppressCelebration = true;
-  renderPokedex();
+  refreshCollectionViews();
 }
 
 export function selectAllOwned() {
   saveMissingAgents(new Set());
   renderOwnedModal();
   updateMissingLabel();
-  renderPokedex();
+  refreshCollectionViews();
 }
 
 export function toggleMissing(name) {
@@ -46,7 +53,7 @@ export function toggleMissing(name) {
   saveMissingAgents(s);
   renderOwnedModal();
   updateMissingLabel();
-  renderPokedex();
+  refreshCollectionViews();
 }
 
 export function renderOwnedModal() {

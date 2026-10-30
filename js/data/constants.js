@@ -44,6 +44,6 @@ export const weathers = {
 
 export const allW = Object.keys(weathers);
 
-export const ANNOUNCE_VERSION = 3;
+export const ANNOUNCE_VERSION = 4;
 
 export const deptOrder = ["蛾部", "雀部", "鸢部", "蜂部", "闲人"];

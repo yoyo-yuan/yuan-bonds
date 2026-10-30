@@ -1,3 +1,4 @@
+import { setBattleFilter, toggleBattleBond } from "./battle-bonds.js";
 import { state } from "../core/state.js";
 import {
   addAccount,
@@ -33,7 +34,12 @@ import {
   setViewMode,
   tglM,
 } from "./dispatch.js";
-import { switchSubTab, switchTab, switchTabFromNav } from "./navigation.js";
+import {
+  goHome,
+  switchSubTab,
+  switchTab,
+  switchTabFromNav,
+} from "./navigation.js";
 import {
   closeAnnounceModal,
   dismissBackupNudge,
@@ -61,6 +67,10 @@ import {
 import { toggleMilestones, toggleProgressScope } from "./progress.js";
 import { refSetSearch, setRefFilter } from "./reference.js";
 const clickActions = {
+  "set-battle-filter": (event, element) =>
+    setBattleFilter(element.dataset.filter, element.dataset.value),
+  "toggle-battle-bond": (event, element) =>
+    toggleBattleBond(element.dataset.battleId),
   "open-announce-modal": (event, element) => {
     openAnnounceModal();
   },
@@ -73,6 +83,7 @@ const clickActions = {
   "switch-tab-from-nav": (event, element) => {
     switchTabFromNav(element.dataset.arg0, element);
   },
+  "go-home": () => goHome(),
   "open-settings-modal": (event, element) => {
     openSettingsModal();
   },

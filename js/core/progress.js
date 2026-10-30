@@ -53,3 +53,13 @@ export function getProgressScope() {
     return "all";
   }
 }
+
+// Used by backup previews, delete warnings and backup reminders. Metadata objects
+// are not unlocks; battle collection entries each count once.
+export function countSavedUnlocks(account = {}) {
+  const weather = Object.entries(account).filter(
+    ([key, value]) => !key.startsWith("__") && value,
+  ).length;
+  const battle = Object.values(account.__battle__ || {}).filter(Boolean).length;
+  return weather + battle;
+}

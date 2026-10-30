@@ -1,3 +1,4 @@
+import { countSavedUnlocks } from "../core/progress.js";
 import { getAccountName, getCurrentServer } from "../core/accounts.js";
 import { state } from "../core/state.js";
 export function showToast(msg, isError) {
@@ -93,9 +94,7 @@ export function showDeleteConfirmModal(displayName, fullKey, onYes) {
   }
   // 计算这个账号已解锁多少进度，给个直观警告
   const prog = state.allAccounts[fullKey] || {};
-  const doneCount = Object.entries(prog).filter(
-    ([k, v]) => k !== "__missing__" && k !== "__server__" && v,
-  ).length;
+  const doneCount = countSavedUnlocks(prog);
   document.getElementById("del-warn-text").innerHTML =
     doneCount > 0
       ? `此操作将永久删除 <strong>${doneCount}</strong> 项已解锁的进度，无法复原。`

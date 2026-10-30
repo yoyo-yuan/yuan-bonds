@@ -1,3 +1,4 @@
+import { countSavedUnlocks } from "../core/progress.js";
 import { mergeBackups, validateBackup } from "../core/backups.js";
 import { saveAccounts, saveCurrentAccount } from "../core/storage.js";
 import {
@@ -172,10 +173,7 @@ export function showImportPreview(imported) {
   const dupAccs = importedKeys.filter((k) => existingKeys.includes(k));
 
   // 计算每个账号有多少进度
-  const countDone = (acc) =>
-    Object.entries(acc || {}).filter(
-      ([k, v]) => k !== "__missing__" && k !== "__server__" && v,
-    ).length;
+  const countDone = countSavedUnlocks;
   // 显示用：徽章 + 名字
   const dispName = (k) => {
     const srv =

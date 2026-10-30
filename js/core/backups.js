@@ -15,6 +15,17 @@ export function validateBackup(value) {
       throw new Error("Missing agents must be a list of names");
     }
     if (
+      account.__battle__ !== undefined &&
+      (!account.__battle__ ||
+        typeof account.__battle__ !== "object" ||
+        Array.isArray(account.__battle__) ||
+        Object.values(account.__battle__).some(
+          (value) => typeof value !== "boolean",
+        ))
+    ) {
+      throw new Error("Battle progress must be a map of collected states");
+    }
+    if (
       account.__server__ !== undefined &&
       !["ry", "dyy"].includes(account.__server__)
     ) {
@@ -37,6 +48,12 @@ export function mergeBackups(existing, incoming, mode = "merge") {
         previous.__missing__ = [
           ...new Set([...(previous.__missing__ || []), ...value]),
         ];
+      } else if (field === "__battle__") {
+        const current = previous.__battle__ || {};
+        previous.__battle__ = { ...current };
+        for (const [battleKey, collected] of Object.entries(value)) {
+          previous.__battle__[battleKey] = !!(current[battleKey] || collected);
+        }
       } else if (field === "__server__") {
         previous.__server__ ||= value;
       } else {

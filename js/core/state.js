@@ -29,6 +29,7 @@ export function createInitialState() {
     curViewMode: "card",
     refFilter: { attr: "全部", rar: "全部", dept: "全部", search: "" },
     refSelectedAgent: null,
+    battleFilter: { agent: "全部", type: "全部", status: "全部" },
     _importMode: "merge",
   };
 }

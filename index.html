@@ -15,7 +15,14 @@
         <!-- 顶部导航 -->
         <div class="top-nav">
           <div class="nav-logo-row">
-            <div class="logo-area">🦅 鸢报羁绊助手</div>
+            <button
+              type="button"
+              class="logo-area"
+              data-click="go-home"
+              aria-label="鸢报羁绊助手，返回鸢报羁绊"
+            >
+              🦅 鸢报羁绊助手
+            </button>
             <button
               class="btn-announce"
               id="btn-announce"
@@ -32,11 +39,19 @@
             ></button>
           </div>
           <div class="nav-ctrl-row">
-            <select
-              id="account-select"
-              class="account-select"
-              data-change="switch-account"
-            ></select>
+            <div class="account-select-wrap">
+              <span
+                class="account-select-label"
+                id="account-select-label"
+                aria-hidden="true"
+              ></span>
+              <select
+                id="account-select"
+                class="account-select"
+                aria-label="当前账号"
+                data-change="switch-account"
+              ></select>
+            </div>
             <button
               class="btn-icon btn-icon-add"
               title="新增账号"
@@ -52,6 +67,18 @@
               rel="noopener"
               >💬</a
             >
+            <button
+              type="button"
+              class="btn-icon btn-icon-battle"
+              id="battle-tab"
+              title="战斗羁绊"
+              aria-label="战斗羁绊"
+              data-click="switch-tab-from-nav"
+              data-arg0="battle"
+              aria-controls="battle-view"
+            >
+              ⚔️
+            </button>
             <button
               class="btn-icon btn-icon-more"
               title="更多 · 资料留存 · 使用说明 · 更新日志"
@@ -77,7 +104,7 @@
         </div>
 
         <!-- 成就进度（固定在 header，可折疊） -->
-        <div class="progress-container">
+        <div class="progress-container" id="yuan-progress">
           <div class="progress-header">
             <span class="progress-title" data-click="toggle-milestones">
               🏆 成就收集进度
@@ -133,7 +160,7 @@
         </div>
 
         <!-- 分页 -->
-        <div class="tabs">
+        <div class="tabs" id="yuan-tabs">
           <div class="tab active" data-click="switch-tab" data-arg0="pokedex">
             🔍 开图鉴
           </div>
@@ -375,6 +402,17 @@
           <h2>📢 最新公告</h2>
 
           <div class="announce-entry">
+            <div class="announce-entry-date">2026/10/31</div>
+            <div class="announce-entry-title">⚔️ 战斗羁绊收集上线</div>
+            <div class="announce-entry-body">
+              现在可以记录 <strong>战斗羁绊</strong> 的收集进度了！共收录
+              <strong>21 组</strong>羁绊，涵盖合击、援护、转移与急诊。<br />
+              点击右上角「⚔️ 战斗羁绊」按钮进入，点击羁绊标记已收集。再次点击右上角 ⚔️ 按钮，即可返回鸢报羁绊。<br /><br />
+              战斗羁绊与鸢报羁绊共用 <strong>密探拥有状态</strong>，未拥有密探对应的羁绊会显示为不可收集。收集进度也会一并包含在导出备份中。
+            </div>
+          </div>
+
+          <div class="announce-entry">
             <div class="announce-entry-date">2026/7/12</div>
             <div class="announce-entry-title">🎉 羁绊资料更新</div>
             <div class="announce-entry-body">
@@ -386,7 +424,7 @@
               <strong>142 组</strong>，代号鸢羁绊总数从
               <strong>159 组</strong> 更新至
               <strong>176 组</strong>。新增羁绊均已标注
-              <span class="new-badge">NEW</span>，可在状态筛选「🆕
+              <span class="new-badge">NEW</span>，可在状态筛选「✨
               新羁绊」快速查看。
             </div>
           </div>
@@ -404,7 +442,7 @@
               等。<br /><br />
               如鸢羁绊总数从 <strong>97 组</strong> 更新至
               <strong>128 组</strong>。新增羁绊标注
-              <span class="new-badge">NEW</span>，可在状态筛选「🆕
+              <span class="new-badge">NEW</span>，可在状态筛选「✨
               新羁绊」快速查看。<br /><br />
               <strong>同步修复：</strong><br />
               • 切换账号时会重复弹出成就窗口 ✓<br />
@@ -438,7 +476,7 @@
               <strong>4月16日</strong> 两次版本更新的新增羁绊配对，共新增
               <strong>41 位</strong>密探（周瑜、诸葛亮、曹丕等）。<br />
               新增羁绊在开图鉴和资料留存中标注
-              <span class="new-badge">NEW</span>，状态筛选选「🆕
+              <span class="new-badge">NEW</span>，状态筛选选「✨
               新羁绊」可快速查看。
             </div>
           </div>
@@ -523,7 +561,7 @@
                 data-click="set-status-filter"
                 data-arg0="新羁绊"
               >
-                🆕 新羁绊
+                ✨ 新羁绊
               </div>
             </div>
           </div>
@@ -962,6 +1000,84 @@
         </div>
         <div id="match-results"></div>
       </div>
+
+      <!-- 战斗羁绊：独立资料，不计入鸢报收集进度 -->
+      <section
+        class="container"
+        id="battle-view"
+        style="display: none"
+        aria-labelledby="battle-heading"
+      >
+        <div class="battle-header">
+          <div>
+            <h2 id="battle-heading">⚔️ 战斗羁绊</h2>
+            <p>点击格子记录收集进度；密探拥有情况与鸢报图鉴同步。</p>
+          </div>
+          <button
+            type="button"
+            class="btn-small battle-owned-button"
+            data-click="open-owned-modal"
+          >
+            ⚙️ 管理密探
+          </button>
+        </div>
+        <div class="battle-collection-progress">
+          <div class="battle-progress-heading">
+            <span>战斗羁绊收集</span
+            ><strong id="battle-progress-text">0 / 21</strong>
+          </div>
+          <div class="battle-progress-track">
+            <div id="battle-progress-fill"></div>
+          </div>
+          <p id="battle-account-hint" hidden>
+            请先在右上角建立账号，再记录收集进度。
+          </p>
+        </div>
+        <div class="filter-panel battle-filters">
+          <div class="filter-row battle-agent-row">
+            <span class="filter-label" id="battle-agent-label">密探</span>
+            <div
+              class="filter-options"
+              id="battle-agent-filters"
+              role="group"
+              aria-labelledby="battle-agent-label"
+            ></div>
+          </div>
+          <div class="filter-row">
+            <span class="filter-label" id="battle-type-label">类型</span>
+            <div
+              class="filter-options"
+              id="battle-type-filters"
+              role="group"
+              aria-labelledby="battle-type-label"
+            ></div>
+          </div>
+          <div class="filter-row">
+            <span class="filter-label" id="battle-status-label">状态</span>
+            <div
+              class="filter-options"
+              id="battle-status-filters"
+              role="group"
+              aria-labelledby="battle-status-label"
+            ></div>
+          </div>
+        </div>
+        <p
+          class="battle-result-count"
+          id="battle-result-count"
+          role="status"
+          aria-live="polite"
+        ></p>
+        <div class="battle-results" id="battle-results"></div>
+        <p class="battle-source">
+          资料来源：<a
+            href="https://wiki.biligame.com/yuan/密探羁绊"
+            target="_blank"
+            rel="noopener"
+            >代号鸢 WIKI · 战斗羁绊</a
+          >
+        </p>
+      </section>
 
       <!-- 资料留存页 -->
       <div class="container" id="feedback-view" style="display: none">
