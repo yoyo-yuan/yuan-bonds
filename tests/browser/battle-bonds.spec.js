@@ -14,7 +14,7 @@ async function start(page) {
     );
     localStorage.setItem("yuan_current_account", "ry::测试");
     localStorage.setItem("yuan_intro_seen", "1");
-    localStorage.setItem("yuan_announce_seen_v", "3");
+    localStorage.setItem("yuan_announce_seen_v", "4");
     localStorage.setItem("yuan_owned_nudge_global_off", "1");
   });
   await page.goto("/");
@@ -206,6 +206,8 @@ test("real backups include weather, battle and ownership data and restore to a c
   });
   await page.reload();
   await expect(page.locator("#onboarding-card")).toBeVisible();
+  await expect(page.locator("#announce-modal")).toBeVisible();
+  await page.locator(".announce-modal-close").click();
   await page.locator("#file-upload").setInputFiles(file);
   await expect(page.locator("#import-preview-modal")).toHaveClass(/open/);
   await page.locator('[data-click="confirm-import"]').click();

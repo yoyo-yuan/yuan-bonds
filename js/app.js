@@ -6,7 +6,12 @@ import { closeAddModal, updateAccountUI } from "./ui/accounts.js";
 import { isDevMode } from "./ui/developer-tools.js";
 import { bindEvents } from "./ui/events.js";
 import { restoreLastTab } from "./ui/navigation.js";
-import { checkBellDot, checkIntroModal } from "./ui/onboarding.js";
+import {
+  checkBellDot,
+  checkAnnouncementPopup,
+  checkIntroModal,
+  renderAnnouncements,
+} from "./ui/onboarding.js";
 import { checkOwnedNudge } from "./ui/owned.js";
 import { renderPokedex, restoreMoreFiltersState } from "./ui/pokedex.js";
 
@@ -43,7 +48,9 @@ export function initializeApp() {
   restoreMoreFiltersState();
   checkOwnedNudge();
   checkIntroModal();
+  renderAnnouncements();
   checkBellDot();
+  checkAnnouncementPopup();
 
   return () => {
     unbindEvents();

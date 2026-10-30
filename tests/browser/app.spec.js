@@ -1,11 +1,15 @@
 import { test, expect } from "@playwright/test";
 import { createBondModel, getSKey } from "../../js/core/bonds.js";
+import {
+  announcements,
+  latestAnnouncementId,
+} from "../../js/data/announcements.js";
 
 const key = "张闿_甘宁_纵火_晴天";
 const preferences = {
   yuan_intro_seen: "1",
   yuan_btn_intro_seen: "1",
-  yuan_announce_seen_v: "3",
+  yuan_announce_seen_v: "4",
   yuan_owned_nudge_global_off: "1",
   yuan_backup_nudge_dismissed: "1",
 };
@@ -14,6 +18,7 @@ async function seed(
   page,
   accounts = { "ry::测试": {} },
   selected = Object.keys(accounts)[0],
+  preferenceOverrides = {},
 ) {
   await page.addInitScript(
     ({ accounts, selected, preferences }) => {
@@ -25,7 +30,11 @@ async function seed(
       for (const [key, value] of Object.entries(preferences))
         localStorage.setItem(key, value);
     },
-    { accounts, selected, preferences },
+    {
+      accounts,
+      selected,
+      preferences: { ...preferences, ...preferenceOverrides },
+    },
   );
   await page.goto("/");
   await expect(page.locator("#account-select")).toBeVisible();
@@ -35,6 +44,88 @@ test.beforeEach(async ({ page }) => {
   page.on("pageerror", (error) => {
     throw error;
   });
+});
+
+test("announcements render from data and remain read after reload", async ({
+  page,
+}) => {
+  await seed(page, undefined, undefined, { yuan_announce_seen_v: "3" });
+  await expect(page.locator("#announce-modal")).toBeVisible();
+  await expect(page.locator(".announce-entry")).toHaveCount(1);
+  await expect(page.locator(".announce-entry-date").first()).toHaveText(
+    "2026/10/31",
+  );
+  await expect(page.locator(".announce-entry-title").first()).toHaveText(
+    "⚔️ 战斗羁绊收集上线",
+  );
+  await expect(page.locator(".announce-entry-body").first()).toContainText(
+    "21 组",
+  );
+  await expect(page.locator("#btn-announce")).not.toHaveClass(/has-unread/);
+  expect(
+    await page.evaluate(() => localStorage.getItem("yuan_announce_seen_v")),
+  ).toBe(String(latestAnnouncementId));
+  await page.locator(".announce-modal-close").click();
+  await page.reload();
+  await expect(page.locator("#announce-modal")).toBeHidden();
+  await expect(page.locator("#btn-announce")).not.toHaveClass(/has-unread/);
+  await page.locator("#btn-announce").click();
+  await expect(page.locator(".announce-entry")).toHaveCount(
+    Math.min(5, announcements.length),
+  );
+});
+
+for (const buttonClass of ["intro-modal-cta", "intro-modal-close"]) {
+  test(`empty browser shows announcement after closing guides with ${buttonClass}`, async ({
+    page,
+  }) => {
+    // No fixture preferences: match a genuinely fresh incognito session.
+    await page.goto("/");
+    expect(
+      await page.evaluate(() => localStorage.getItem("yuan_announce_seen_v")),
+    ).toBeNull();
+    await expect(page.locator("#intro-modal")).toBeVisible();
+    await expect(page.locator("#announce-modal")).toBeHidden();
+    await page
+      .locator(`.${buttonClass}[data-click="dismiss-intro-modal"]`)
+      .click();
+    await expect(page.locator("#btn-intro-modal")).toBeVisible();
+    await expect(page.locator("#announce-modal")).toBeHidden();
+    await page
+      .locator(`.${buttonClass}[data-click="dismiss-btn-intro-modal"]`)
+      .click();
+    await expect(page.locator("#announce-modal")).toBeVisible();
+    await page.locator(".announce-modal-close").click();
+    await page.reload();
+    await expect(page.locator("#announce-modal")).toBeHidden();
+  });
+}
+
+test("agent arrows follow their own expanded state inside an open department", async ({
+  page,
+}) => {
+  await seed(page);
+  const card = page.locator("#agent-张闿");
+  const department = card.locator(
+    "xpath=ancestor::details[contains(@class, 'dept-section')]",
+  );
+  const arrow = card.locator(":scope > summary .summary-arrow");
+  const departmentArrow = department.locator(":scope > summary .summary-arrow");
+  await expect(department).toHaveAttribute("open", "");
+  await expect(card).not.toHaveAttribute("open");
+  await expect(arrow).toHaveCSS("transform", "none");
+  await expect(departmentArrow).toHaveCSS(
+    "transform",
+    "matrix(-1, 0, 0, -1, 0, 0)",
+  );
+  await card.locator(":scope > summary").click();
+  await expect(arrow).toHaveCSS("transform", "matrix(-1, 0, 0, -1, 0, 0)");
+  await card.locator(":scope > summary").click();
+  await expect(arrow).toHaveCSS("transform", "none");
+  await expect(departmentArrow).toHaveCSS(
+    "transform",
+    "matrix(-1, 0, 0, -1, 0, 0)",
+  );
 });
 
 test("create account, unlock a bond, and reload without losing progress", async ({

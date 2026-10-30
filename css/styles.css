@@ -1132,6 +1132,7 @@ details[open] summary {
   min-width: 3.5em;
 }
 .summary-arrow {
+  display: inline-block;
   color: var(--primary);
   font-size: var(--fs-base);
   margin-left: var(--s-2);
@@ -1142,7 +1143,7 @@ details[open] summary {
 summary:hover .summary-arrow {
   opacity: 0.8;
 }
-details[open] .summary-arrow {
+details[open] > summary .summary-arrow {
   transform: rotate(180deg);
   color: var(--highlight);
   opacity: 1;

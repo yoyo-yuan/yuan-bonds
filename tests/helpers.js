@@ -10,7 +10,7 @@ export const html = readFileSync(
 export const defaultPreferences = {
   yuan_intro_seen: "1",
   yuan_btn_intro_seen: "1",
-  yuan_announce_seen_v: "3",
+  yuan_announce_seen_v: "4",
   yuan_owned_nudge_global_off: "1",
   yuan_backup_nudge_dismissed: "1",
 };

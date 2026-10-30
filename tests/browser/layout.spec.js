@@ -15,7 +15,7 @@ async function start(
       localStorage.setItem("yuan_all_accounts", JSON.stringify(accounts));
       localStorage.setItem("yuan_current_account", selected);
       localStorage.setItem("yuan_intro_seen", "1");
-      localStorage.setItem("yuan_announce_seen_v", "3");
+      localStorage.setItem("yuan_announce_seen_v", "4");
       localStorage.setItem("yuan_owned_nudge_global_off", "1");
     },
     { accounts, selected },
